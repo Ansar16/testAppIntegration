@@ -1,0 +1,51 @@
+{
+  "private": true,
+  "name": "ark",
+  "version": "7.1.0",
+  "scripts": {
+    "dev": "tsnd --project tsconfig.server.json --ignore-watch .next server/main.ts",
+    "build": "rimraf .next && run-p build:server build:client",
+    "build:server": "tsc --project tsconfig.server.json",
+    "build:client": "next build",
+    "start": "cross-env NODE_ENV=production node .next/production-server/main.js",
+    "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js"    
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.11.0",
+    "@nestjs/common": "^7.4.4",
+    "@nestjs/core": "^7.4.4",
+    "@nestjs/platform-express": "^7.4.4",
+    "bcrypt": "^5.0.0",
+    "connect-pg-simple": "^6.2.1",
+    "dotenv": "^8.2.0",
+    "dotenv-webpack": "^4.0.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "ky": "^0.23.0",
+    "ky-universal": "^0.8.2",
+    "next": "^9.5.3",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "pg": "^8.3.3",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.6.3",
+    "typeorm": "^0.2.26"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "@types/express-session": "^1.17.0",
+    "@types/node": "^14.11.2",
+    "@types/passport-local": "^1.0.33",
+    "@types/react": "^16.9.49",
+    "@types/react-dom": "^16.9.8",
+    "cross-env": "^7.0.2",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "ts-node-dev": "^1.0.0-pre.63",
+    "typescript": "^4.0.3",
+    "url-loader": "^4.1.0",
+    "webpack": "^4.44.2"
+  }
+}

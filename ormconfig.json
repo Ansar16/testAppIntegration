@@ -1,0 +1,13 @@
+{
+    "type": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgres",
+    "database": "axolt_rebuild",
+    "entities": ["server/entities/*.ts"],
+    "migrations": ["server/migrations/*.ts"],
+    "cli": {
+        "migrationsDir": "server/migrations"
+    }
+}
