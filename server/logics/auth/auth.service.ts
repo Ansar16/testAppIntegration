@@ -33,6 +33,8 @@ export class AuthService {
 
   public async validateUser(email: string, password: string): Promise<any> {
     const user: User | undefined = await this.userService.findOneByEmail(email);
+    const bcrypt_pass = await bcrypt.compare(password, user.password)
+    const bcrypt_pass1 = await bcrypt.hash("123456", 8)
 
     if (user && await bcrypt.compare(password, user.password)) {
       const { password, ...result } = user;

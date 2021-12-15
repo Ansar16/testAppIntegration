@@ -25,7 +25,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-, "server/migrations/1638745079906-CreateAdminUser.js"  ],
+, "server/migrations/1638745079906-CreateAdminUser.js", "server/logics/auth/auth.service.mjs"  ],
   "exclude": [
     "node_modules"
   ]

@@ -59,7 +59,6 @@ const Login = () => {
     if (response.ok) {
       location.href = '/';
     } else {
-      debugger
       alert('Failed to login!');
     }
   }

@@ -3,8 +3,10 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  useScrollTrigger,
+  useScrollTrigger, 
+  Button,
 } from '@material-ui/core';
+import { Http } from "../../../lib/http";
 
 interface ElevateAppBarProps {
   children: React.ReactElement;
@@ -21,13 +23,29 @@ const ElevationScroll = (props: ElevateAppBarProps) => {
   });
 };
 
+const onClick = async (e: React.MouseEvent) => {
+  e.preventDefault();
+  const http = new Http();
+  const response = await http.post('api/auth/logout');
+  if (response.ok) {
+    location.href = '/auth/login';
+  }
+};
 export const ElevateAppBar = () => {
   return (
     <ElevationScroll>
       <AppBar>
         <Toolbar>
           <Typography variant="h6">Axolt</Typography>
-        </Toolbar>
+          <Button
+                  type="submit"
+                  color="inherit"
+                  size="large"
+                  onClick={onClick}
+                >
+                  LOGOUT
+                </Button>
+          </Toolbar>
       </AppBar>
     </ElevationScroll>
   );
