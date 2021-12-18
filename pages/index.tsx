@@ -1,5 +1,7 @@
-import React from 'react';
+import React from 'react'
 import Select from 'react-select'
+import { render } from 'react-dom'
+import FlashMessage from 'react-flash-message'
 
 import {
   Theme,
@@ -15,6 +17,8 @@ import {
 } from '@material-ui/core';
 import { Http } from '../lib/http';
 import { Layout } from '../components/Layout';
+import { response } from 'express';
+import { platform } from 'os';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -39,95 +43,159 @@ const useStyles = makeStyles((theme: Theme) =>
     submitButton: {
       margin: `${theme.spacing(4)}px 0`,
     },
+    img: {
+      width: '300px',
+    },
   }),
 );
 
-const options = [
-  { value: 'etsy', label: 'Etsy' },
-  { value: 'amazon', label: 'Amazon' },
-  { value: 'shopify', label: 'Shopify' }
-]
+  const platformOptions = [
+    { value: 'etsy', label: 'Etsy' },
+    { value: 'amazon', label: 'Amazon' },
+    { value: 'shopify', label: 'Shopify' }
+  ]
+
+  let emailOptions = []
 
 const Index = ({ user }) => {
-  const [selectedOptions, setSelectedOptions] = React.useState([]);
-
+  const http = new Http();
+  const [selectedOptions, setSelectedOptions] = React.useState([])
+  const [showFlash, setShowFlash] = React.useState({
+      show_message: false,
+      message: 'Access Granted Successfully!'
+    })
 
   const handleChange = (options) => {
-    setSelectedOptions(options);
+    setSelectedOptions(options)
+  }
+
+  const handleEmailChange = async (option) => {
+    const response = await http.get(`api/user/getAccessOfArray?id=${option.value}`)
+    let body = await response.json()
+    setSelectedOptions(platformOptions.filter(element => body.includes(element.value)))
   }
 
   const classes = useStyles({});
-  const [email, setEmail] = React.useState('');
-  const onChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value);
- 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
 
-    const http = new Http();
+  const initializeData = async () => {
+    const response = await http.get('api/user/getUsers')
+    let body = await response.json()
 
-    const data = {
-      name: e.currentTarget.email.value.split("@")[0],
-      email: e.currentTarget.email.value,
-      password: '123456',
-      hasAccessOf: selectedOptions,
+    if (emailOptions.length < 1) {
+      body.forEach((element)=> {
+        emailOptions.push({ value: element.id, label: element.email })
+      })
     }
-
-    const response = await http.post('api/auth/register', data);
-  
-    console.log(selectedOptions)
   }
 
-  return (
-    <Layout>
-      <div className={classes.root}>
-        <div className={classes.container}>
-          <Card className={classes.card}>
-            <CardContent>
-            <form
-              onSubmit={onSubmit}
-              autoComplete="off"
-              noValidate
-            >
-              <FormControl className={classes.formControl} variant="outlined">
-                <TextField 
-                  id="email"
-                  name="email"
-                  type="text"
-                  label="Email"
-                  onChange={onChangeEmail}
-                  variant="outlined"
-                  margin="normal"
-                />
-              </FormControl>
-              <FormControl className={classes.formControl} variant="outlined">
-                <Select
-                  name="platform"
-                  placeholder="Platforms"
-                  options={options}
-                  onChange={handleChange}
-                  isMulti
-                  className="basic-multi-select"
-                  classNamePrefix="select"
-                />
-              </FormControl>
-          
-              <Button
-                className={classes.submitButton}
-                type="submit"
-                variant="outlined"
-                color="primary"
-                size="large"
+  const renderImages = () => {
+    let platform_images = []
+
+    user.has_access_of.forEach((platform)=> {
+      if (platform == "amazon")
+        platform_images.push(<img className = {classes.img} src='/images/amazon.png' alt='logo'/>)
+      else if (platform == "etsy")
+        platform_images.push(<img className = {classes.img} src='/images/etsy.png' alt='logo'/>)
+      else
+        platform_images.push(<img className = {classes.img} src='/images/shopify.png' alt='logo'/>)
+    })
+
+    return platform_images
+  }
+
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = {
+      id: e.currentTarget.email.value,
+      hasAccessOf: selectedOptions.map((element) => element.value)
+    }
+
+    const response = await http.post('api/user/updatePlatformAccess', data);
+
+    if (response.ok) {
+      setShowFlash({show_message: true, message: 'Access Granted Successfully!'})
+    }
+  }
+
+  if (user.role == "admin") {
+    initializeData()
+
+    return (
+      <Layout>
+        <div className={classes.root}>
+          <div className={classes.container}>
+            <Card className={classes.card}>
+              <CardContent>
+              <form
+                onSubmit={onSubmit}
+                autoComplete="off"
+                noValidate
               >
-                Send Invite
-              </Button>
-              <br />
-            </form>
-            </CardContent>
-          </Card>
+                <FormControl className={classes.formControl} variant="outlined">
+                  <Select
+                    name="email"
+                    placeholder="Choose an email"
+                    options={emailOptions}
+                    onChange={handleEmailChange}
+                    className="basic-multi-select"
+                    classNamePrefix="select"
+                  />
+                </FormControl>
+                <br />
+                <br />
+
+                <FormControl className={classes.formControl} variant="outlined">
+                  <Select
+                    name="platform"
+                    placeholder="Platforms"
+                    value={selectedOptions}
+                    options={platformOptions}
+                    onChange={handleChange}
+                    isMulti
+                    className="basic-multi-select"
+                    classNamePrefix="select"
+                  />
+                </FormControl>
+
+                <Button
+                  className={classes.submitButton}
+                  type="submit"
+                  variant="outlined"
+                  color="primary"
+                  size="large"
+                >
+                  Grant Access
+                </Button>
+                { showFlash.show_message &&
+                  <div>
+                    <FlashMessage duration={5000}>
+                        <strong>{showFlash.message}</strong>
+                    </FlashMessage>
+                  </div>
+                }
+                <br />
+              </form>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
-    </Layout>
-  );
+      </Layout>
+    );
+  }
+  else {
+    return (
+      <Layout>
+        <div className={classes.root}>
+          <div className={classes.container}>
+            <div class = "row">
+              { renderImages() }
+            </div>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
 };
 
 Index.getInitialProps = async ({ req }) => {

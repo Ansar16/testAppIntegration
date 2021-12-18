@@ -10,6 +10,7 @@ import {
 import { User } from '../../entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { USER_REPOSITORY } from '../database/constants';
+export type UserRoleType = "admin" | "user"
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,14 @@ export class UserService {
 
   public async findOne(id: number): Promise<User | undefined> {
     return this.repository.findOne(id);
+  }
+
+  public async findAllUsers(role: UserRoleType): Promise<User | undefined> {
+    return this.repository.query(`SELECT * FROM public.user where role='${role}'`)
+  }
+
+  public async updatePlatformAccess(id: number, has_access_of: {}): Promise<User | undefined> {
+    return this.repository.query(`update public.user set has_access_of='${JSON.stringify(has_access_of)}'::jsonb where id=${id}`)
   }
 
   public async findOneByEmail(email: string): Promise<User | undefined> {

@@ -30,15 +30,20 @@ export class User {
   role: UserRoleType
 
   @Column({
-    type: 'json',
+    type: 'jsonb',
     default: []
   })
   has_access_of: {};
 
-  
-  @Column('timestamp')
+
+  @Column({
+    type: 'timestamp',
+    default: new Date().toISOString()
+  })
   created_at: string;
 
-  @Column('timestamp')
-  updated_at: string;
+  @Column({
+    type: 'timestamp',
+    default: new Date().toISOString()
+  })updated_at: string;
 }
